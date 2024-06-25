@@ -1,4 +1,4 @@
-using OpenTK.Graphics.ES20;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -50,8 +50,11 @@ public class Game : GameWindow
         base.OnRenderFrame(args);
         
         GL.Clear(ClearBufferMask.ColorBufferBit);
-        
-        
+
+        if (_program is not null)
+        {
+            _program.Draw();
+        }
         
         SwapBuffers();
     }
@@ -60,7 +63,7 @@ public class Game : GameWindow
     {
         base.OnFramebufferResize(e);
         
-        GL.Viewport(0, 0, e.Width, e.Width);
+        GL.Viewport(0, 0, e.Width, e.Height);
     }
 
     #endregion
