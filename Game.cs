@@ -7,7 +7,7 @@ namespace Voxen;
 
 public class Game : GameWindow
 {
-    #region Constructor
+    #region Constructors
     
     public Game() : base(GameWindowSettings.Default, NativeWindowSettings.Default)
     {
@@ -25,6 +25,17 @@ public class Game : GameWindow
         base.OnLoad();
         
         GL.ClearColor(0.2f, 0.2f, 0.3f, 1.0f);
+
+        Shader vertexShader = new(ShaderType.VertexShader, "../../../Shaders/vshader.glsl");
+        Shader fragmentShader = new(ShaderType.FragmentShader, "../../../Shaders/fshader.glsl");
+        _program = new GlProgram(vertexShader, fragmentShader);
+    }
+
+    protected override void OnUnload()
+    {
+        base.OnUnload();
+
+        _program?.Dispose();
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
@@ -74,6 +85,12 @@ public class Game : GameWindow
                 : WindowState.Fullscreen;
         }
     }
+
+    #endregion
+
+    #region Fields
+
+    private GlProgram? _program = null;
 
     #endregion
 }
