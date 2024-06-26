@@ -37,13 +37,6 @@ public class GlProgram : IDisposable
             GL.DeleteShader(shader.Handle);
         }
         
-        float[] vertices =
-        [
-            -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // Bottom-left vertex
-            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom-right vertex
-            0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // Top vertex
-        ];
-        
         // VAO
         _vertexArrayObject = GL.GenVertexArray();
         GL.BindVertexArray((int)_vertexArrayObject);
@@ -51,14 +44,19 @@ public class GlProgram : IDisposable
         // VBO
         int vertexBufferObject = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
-        
-        GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
 
+        // VAO indexes
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
         GL.EnableVertexAttribArray(0);
         
         GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
         GL.EnableVertexAttribArray(1);
+        
+        // EBO
+        int elementBufferObject = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, elementBufferObject);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, _triangleIndices.Length * sizeof(uint), _triangleIndices, BufferUsageHint.StaticDraw);
     }
 
     #endregion
@@ -100,15 +98,29 @@ public class GlProgram : IDisposable
         
         GL.UseProgram((int)_handle);
         GL.BindVertexArray((int)_vertexArrayObject);
-        GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+        GL.DrawElements(PrimitiveType.Triangles, _triangleIndices.Length, DrawElementsType.UnsignedInt, 0);
     }
 
     #endregion
 
     #region Fields
 
-    private readonly int? _handle = null;
-    private readonly int? _vertexArrayObject = null;
+    private readonly int? _handle;
+    private readonly int? _vertexArrayObject;
+        
+    private readonly float[] _vertices =
+    [
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // Top-right vertex
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom-right vertex
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // Bottom-left vertex
+        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, // Top-left vertex
+    ];
+
+    private readonly uint[] _triangleIndices =
+    [
+        0, 1, 3, // Top-right triangle
+        1, 2, 3, // Bottom-left triangle
+    ];
 
     #endregion
 }
