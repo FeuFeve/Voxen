@@ -1,4 +1,4 @@
 ﻿using Voxen;
 
-using Game game = new();
+using Window game = new();
 game.Run();
