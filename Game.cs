@@ -25,6 +25,8 @@ public class Game : GameWindow
         base.OnLoad();
         
         GL.ClearColor(0.2f, 0.2f, 0.3f, 1.0f);
+        
+        GL.Enable(EnableCap.DepthTest);
 
         Shader vertexShader = new(ShaderType.VertexShader, "../../../Shaders/vshader.glsl");
         Shader fragmentShader = new(ShaderType.FragmentShader, "../../../Shaders/fshader.glsl");
@@ -53,7 +55,7 @@ public class Game : GameWindow
 
         if (_program is not null)
         {
-            _program.Draw();
+            _program.Draw(ClientSize.X, ClientSize.Y);
         }
         
         SwapBuffers();

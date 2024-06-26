@@ -1,4 +1,5 @@
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace Voxen;
 
@@ -88,7 +89,7 @@ public class GlProgram : IDisposable
 
     #region Public methods
 
-    public void Draw()
+    public void Draw(int viewportWidth, int viewportHeight)
     {
         if (_handle is null || _vertexArrayObject is null)
         {
@@ -97,6 +98,24 @@ public class GlProgram : IDisposable
         }
         
         GL.UseProgram((int)_handle);
+        
+        // Uniforms
+        Matrix4 model = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(-55.0f));
+        Matrix4 view = Matrix4.CreateTranslation(0.0f, 0.0f, -3.0f);
+        Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45.0f), (float)viewportWidth / viewportHeight, 0.1f, 100.0f);
+        
+        string modelName = GL.GetActiveUniform((int)_handle, 0, out _, out _);
+        string viewName = GL.GetActiveUniform((int)_handle, 1, out _, out _);
+        string projectionName = GL.GetActiveUniform((int)_handle, 2, out _, out _);
+        
+        int modelLocation = GL.GetUniformLocation((int)_handle, modelName);
+        int viewLocation = GL.GetUniformLocation((int)_handle, viewName);
+        int projectionLocation = GL.GetUniformLocation((int)_handle, projectionName);
+        
+        GL.UniformMatrix4(modelLocation, true, ref model);
+        GL.UniformMatrix4(viewLocation, true, ref view);
+        GL.UniformMatrix4(projectionLocation, true, ref projection);
+        
         GL.BindVertexArray((int)_vertexArrayObject);
         GL.DrawElements(PrimitiveType.Triangles, _triangleIndices.Length, DrawElementsType.UnsignedInt, 0);
     }
