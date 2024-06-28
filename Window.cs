@@ -58,18 +58,12 @@ public class Window : GameWindow
         GL.EnableVertexAttribArray(vertexColorLocation);
         GL.VertexAttribPointer(vertexColorLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
 
-        // For the view, we don't do too much here. Next tutorial will be all about a Camera class that will make it much easier to manipulate the view.
-        // For now, we move it backwards three units on the Z axis.
-        _view = Matrix4.CreateTranslation(0.0f, 0.0f, -3.0f);
+        // We initialize the camera so that it is 3 units back from where the rectangle is.
+        // We also give it the proper aspect ratio.
+        _camera = new Camera(new Vector3(0.0f, 2.0f, 3.0f), Size.X / (float)Size.Y);
 
-        // For the matrix, we use a few parameters.
-        //   Field of view. This determines how much the viewport can see at once. 45 is considered the most "realistic" setting, but most video games nowadays use 90
-        //   Aspect ratio. This should be set to Width / Height.
-        //   Near-clipping. Any vertices closer to the camera than this value will be clipped.
-        //   Far-clipping. Any vertices farther away from the camera than this value will be clipped.
-        _projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45f), Size.X / (float)Size.Y, 0.1f, 100.0f);
-
-        // Now, head over to OnRenderFrame to see how we setup the model matrix.
+        // We make the mouse cursor invisible and captured so we can have proper FPS-camera movement.
+        CursorState = CursorState.Grabbed;
     }
 
     protected override void OnRenderFrame(FrameEventArgs e)
@@ -81,9 +75,6 @@ public class Window : GameWindow
             return;
         }
 
-        // We add the time elapsed since last frame, times 4.0 to speed up animation, to the total amount of time passed.
-        _time += 20.0 * e.Time;
-
         // We clear the depth buffer in addition to the color buffer.
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -91,23 +82,14 @@ public class Window : GameWindow
 
         _shader.Use();
 
-        // Finally, we have the model matrix. This determines the position of the model.
-        Matrix4 model = Matrix4.Identity
-                        * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time))
-                        * Matrix4.CreateRotationY((float)MathHelper.DegreesToRadians(_time));
-
-        // Then, we pass all of these matrices to the vertex shader.
-        // You could also multiply them here and then pass, which is faster, but having the separate matrices available is used for some advanced effects.
-
-        // IMPORTANT: OpenTK's matrix types are transposed from what OpenGL would expect - rows and columns are reversed.
-        // They are then transposed properly when passed to the shader. 
-        // This means that we retain the same multiplication order in both OpenTK c# code and GLSL shader code.
-        // If you pass the individual matrices to the shader and multiply there, you have to do in the order "model * view * projection".
-        // You can think like this: first apply the modelToWorld (aka model) matrix, then apply the worldToView (aka view) matrix, 
-        // and finally apply the viewToProjectedSpace (aka projection) matrix.
-        _shader.SetMatrix4("model", model);
-        _shader.SetMatrix4("view", _view);
-        _shader.SetMatrix4("projection", _projection);
+        if (_camera is null)
+        {
+            return;
+        }
+        
+        _shader.SetMatrix4("model", Matrix4.Identity);
+        _shader.SetMatrix4("view", _camera.GetViewMatrix());
+        _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
         GL.DrawElements(PrimitiveType.Triangles, _triangleIndices.Length, DrawElementsType.UnsignedInt, 0);
 
@@ -118,12 +100,8 @@ public class Window : GameWindow
     {
         base.OnUpdateFrame(e);
 
-        KeyboardState? input = KeyboardState;
-
-        if (input.IsKeyDown(Keys.Escape))
-        {
-            Close();
-        }
+        HandleKeyboardEvents((float)e.Time);
+        HandleMouseEvents((float)e.Time);
     }
 
     protected override void OnResize(ResizeEventArgs e)
@@ -131,24 +109,118 @@ public class Window : GameWindow
         base.OnResize(e);
 
         GL.Viewport(0, 0, Size.X, Size.Y);
+            
+        // We need to update the aspect ratio once the window has been resized.
+        if (_camera is not null)
+        {
+            _camera.AspectRatio = Size.X / (float)Size.Y;
+        }
     }
+
+    protected override void OnMouseWheel(MouseWheelEventArgs e)
+    {
+        base.OnMouseWheel(e);
+
+        if (_camera is not null)
+        {
+            _camera.Fov -= e.OffsetY;
+        }
+    }
+
+    #region Private methods
+
+    private void HandleKeyboardEvents(float deltaTime)
+    {
+        if (!KeyboardState.IsAnyKeyDown)
+        {
+            return;
+        }
+
+        if (KeyboardState.IsKeyDown(Keys.Escape))
+        {
+            Close();
+        }
+        else if (KeyboardState.IsKeyPressed(Keys.F11))
+        {
+            WindowState = WindowState == WindowState.Fullscreen
+                ? WindowState.Normal
+                : WindowState.Fullscreen;
+        }
+
+        if (_camera is not null)
+        {
+            float cameraSpeed = 2.0f;
+            
+            if (KeyboardState.IsKeyDown(Keys.LeftShift))
+            {
+                cameraSpeed *= 2;
+            }
+            if (KeyboardState.IsKeyDown(Keys.W))
+            {
+                _camera.Position += _camera.Front * cameraSpeed * deltaTime; // Forward
+            }
+            if (KeyboardState.IsKeyDown(Keys.S))
+            {
+                _camera.Position -= _camera.Front * cameraSpeed * deltaTime; // Backwards
+            }
+            if (KeyboardState.IsKeyDown(Keys.A))
+            {
+                _camera.Position -= _camera.Right * cameraSpeed * deltaTime; // Left
+            }
+            if (KeyboardState.IsKeyDown(Keys.D))
+            {
+                _camera.Position += _camera.Right * cameraSpeed * deltaTime; // Right
+            }
+            if (KeyboardState.IsKeyDown(Keys.Space) || KeyboardState.IsKeyDown(Keys.E))
+            {
+                _camera.Position += _camera.Up * cameraSpeed * deltaTime; // Up
+            }
+            if (KeyboardState.IsKeyDown(Keys.LeftControl) || KeyboardState.IsKeyDown(Keys.Q))
+            {
+                _camera.Position -= _camera.Up * cameraSpeed * deltaTime; // Down
+            }
+        }
+    }
+
+    private void HandleMouseEvents(float deltaTime)
+    {
+        if (_camera is null)
+        {
+            return;
+        }
+        
+        // Get the mouse state
+        float sensitivity = 0.2f;
+
+        if (_firstMove) // This bool variable is initially set to true.
+        {
+            _lastPos = new Vector2(MouseState.X, MouseState.Y);
+            _firstMove = false;
+        }
+        else
+        {
+            // Calculate the offset of the mouse position
+            var deltaX = MouseState.X - _lastPos.X;
+            var deltaY = MouseState.Y - _lastPos.Y;
+            _lastPos = new Vector2(MouseState.X, MouseState.Y);
+
+            // Apply the camera pitch and yaw (we clamp the pitch in the camera class)
+            _camera.Yaw += deltaX * sensitivity;
+            _camera.Pitch -= deltaY * sensitivity; // Reversed since y-coordinates range from bottom to top
+        }
+    }
+
+    #endregion
 
     #region Fields
 
     private int? _vertexArrayObject;
+    
+    private bool _firstMove = true;
+    private Vector2 _lastPos;
 
     private Shader? _shader;
-
-    // We create a double to hold how long has passed since the program was opened.
-    private double _time;
-
-    // Then, we create two matrices to hold our view and projection. They're initialized at the bottom of OnLoad.
-    // The view matrix is what you might consider the "camera". It represents the current viewport in the window.
-    private Matrix4 _view;
-
-    // This represents how the vertices will be projected. It's hard to explain through comments,
-    // so check out the web version for a good demonstration of what this does.
-    private Matrix4 _projection;
+    private Camera? _camera;
 
     #endregion
 
@@ -156,16 +228,41 @@ public class Window : GameWindow
 
     private readonly float[] _vertices =
     [
-         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // Top-right vertex
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom-right vertex
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // Bottom-left vertex
-        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, // Top-left vertex
+        // 20x20 flat gray plane
+         10.0f,   0.0f,  10.0f, 0.5f, 0.5f, 0.5f,
+         10.0f,   0.0f, -10.0f, 0.5f, 0.5f, 0.5f,
+        -10.0f,   0.0f, -10.0f, 0.5f, 0.5f, 0.5f,
+        -10.0f,   0.0f,  10.0f, 0.5f, 0.5f, 0.5f,
+        
+        -1.5f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Top-right vertex
+        -1.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom-right vertex
+        -2.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f, // Bottom-left vertex
+        -2.5f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Top-left vertex
+         
+         0.5f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Top-right vertex
+         0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom-right vertex
+        -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f, // Bottom-left vertex
+        -0.5f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Top-left vertex
+         
+         2.5f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Top-right vertex
+         2.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom-right vertex
+         1.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f, // Bottom-left vertex
+         1.5f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Top-left vertex
     ];
 
     private readonly uint[] _triangleIndices =
     [
         0, 1, 3, // Top-right triangle
         1, 2, 3, // Bottom-left triangle
+        
+        4, 5, 7, // Top-right triangle
+        5, 6, 7, // Bottom-left triangle
+        
+        8, 9, 11,  // Top-right triangle
+        9, 10, 11, // Bottom-left triangle
+        
+        12, 13, 15, // Top-right triangle
+        13, 14, 15, // Bottom-left triangle
     ];
 
     #endregion
