@@ -32,6 +32,10 @@ public class Window : GameWindow
         // you'll notice that polygons further in the background will occasionally be drawn over the top of the ones in the foreground.
         // Obviously, we don't want this, so we enable depth testing. We also clear the depth buffer in GL.Clear over in OnRenderFrame.
         GL.Enable(EnableCap.DepthTest);
+        GL.Enable(EnableCap.Blend);
+
+        // Set the blending function
+        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
         _vertexArrayObject = GL.GenVertexArray();
         GL.BindVertexArray((int)_vertexArrayObject);
@@ -43,6 +47,12 @@ public class Window : GameWindow
         int elementBufferObject = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, elementBufferObject);
         GL.BufferData(BufferTarget.ElementArrayBuffer, _triangleIndices.Length * sizeof(uint), _triangleIndices, BufferUsageHint.StaticDraw);
+
+        double[] bytes = [255, 127, 0, 127, 255, 0, 255, 0];
+        int ssbo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ShaderStorageBuffer, ssbo);
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, ssbo);
+        GL.BufferData(BufferTarget.ShaderStorageBuffer, bytes.Length * sizeof(double), bytes, BufferUsageHint.StaticDraw);
 
         // shader.vert has been modified. Take a look at it after the explanation in OnRenderFrame.
         _shader = new Shader(
