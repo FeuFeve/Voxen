@@ -74,6 +74,22 @@ public class Window : GameWindow
 
         // We make the mouse cursor invisible and captured so we can have proper FPS-camera movement.
         CursorState = CursorState.Grabbed;
+
+        Random random = new();
+        
+        uint number = (uint)random.Next();
+        Console.WriteLine(Convert.ToString(number, toBase: 2));
+
+        uint n1 = (number & 0b_11111111_00000000_00000000_00000000) >> 24;
+        uint n2 = (number & 0b_00000000_11111111_00000000_00000000) >> 16;
+        uint n3 = (number & 0b_00000000_00000000_11111111_00000000) >> 8;
+        uint n4 =  number & 0b_00000000_00000000_00000000_11111111;
+        
+        Console.WriteLine($"{Convert.ToString(n1, toBase: 2)}{Convert.ToString(n2, toBase: 2)}{Convert.ToString(n3, toBase: 2)}{Convert.ToString(n4, toBase: 2)}");
+        Console.WriteLine("|   .   |   .   |   .   |   .   ");
+
+        uint number2 = (n1 << 24) + (n2 << 16) + (n3 << 8) + n4;
+        Console.WriteLine(number == number2);
     }
 
     protected override void OnRenderFrame(FrameEventArgs e)
