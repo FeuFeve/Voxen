@@ -16,4 +16,16 @@
       <Folder Include="Labraries\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Voxen.UnitTests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Voxen.UnitTests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Voxen.UnitTests\**" />
+    </ItemGroup>
+
 </Project>

@@ -6,4 +6,5 @@ public enum VoxelType : byte
     Stone = 1,
     Dirt = 2,
     Grass = 3,
+    // 128-255 are reserved for partial blocks (used for LODs)
 }
