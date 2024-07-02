@@ -1,4 +1,4 @@
-using Voxen.World;
+using Voxen.Entities;
 
 namespace Voxen.UnitTests;
 
