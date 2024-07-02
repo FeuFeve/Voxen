@@ -15,12 +15,12 @@
 //
 //     #region Public methods
 //     
-//     public Chunk GenerateNewChunk(Vector3i chunkCoordinates)
+//     public ChunkData GenerateNewChunk(Vector3i chunkCoordinates)
 //     {
 //         // TODO: handle underground chunks
 //         if (chunkCoordinates.Y < 0)
 //         {
-//             return new Chunk
+//             return new ChunkData
 //             {
 //                 Voxels = [VoxelType.Stone],
 //             };
@@ -29,7 +29,7 @@
 //         // TODO: handle "sky" chunks
 //         if (chunkCoordinates.Y > 0)
 //         {
-//             return new Chunk
+//             return new ChunkData
 //             {
 //                 Voxels = [VoxelType.Air],
 //             };
@@ -46,12 +46,12 @@
 //
 //     private float[,] GenerateNoiseData(ref Vector3i chunkCoordinates)
 //     {
-//         float[,] noiseData = new float[Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE];
+//         float[,] noiseData = new float[ChunkData.CHUNK_SIZE, ChunkData.CHUNK_SIZE];
 //
-//         int startingX = chunkCoordinates.X * Chunk.CHUNK_SIZE;
-//         int endingX = startingX + Chunk.CHUNK_SIZE;
-//         int startingZ = chunkCoordinates.Z + Chunk.CHUNK_SIZE;
-//         int endingZ = startingZ + Chunk.CHUNK_SIZE;
+//         int startingX = chunkCoordinates.X * ChunkData.CHUNK_SIZE;
+//         int endingX = startingX + ChunkData.CHUNK_SIZE;
+//         int startingZ = chunkCoordinates.Z + ChunkData.CHUNK_SIZE;
+//         int endingZ = startingZ + ChunkData.CHUNK_SIZE;
 //
 //         for (int x = startingX; x < endingX; x++)
 //         {
@@ -66,18 +66,18 @@
 //
 //     private static VoxelType[,,] GenerateLod0FromNoiseData(ref float[,] noiseData)
 //     {
-//         VoxelType[,,] lod0 = new VoxelType[Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE];
+//         VoxelType[,,] lod0 = new VoxelType[ChunkData.CHUNK_SIZE, ChunkData.CHUNK_SIZE, ChunkData.CHUNK_SIZE];
 //
-//         for (int x = 0; x < Chunk.CHUNK_SIZE; x++)
+//         for (int x = 0; x < ChunkData.CHUNK_SIZE; x++)
 //         {
-//             for (int z = 0; z < Chunk.CHUNK_SIZE; z++)
+//             for (int z = 0; z < ChunkData.CHUNK_SIZE; z++)
 //             {
 //                 float terrainHeight = noiseData[x, z];
 //                 short blocksToStone = 4;
 //
-//                 for (int y = Chunk.CHUNK_SIZE - 1; y >= 0; y--)
+//                 for (int y = ChunkData.CHUNK_SIZE - 1; y >= 0; y--)
 //                 {
-//                     float currentHeight = (float)y / Chunk.CHUNK_SIZE;
+//                     float currentHeight = (float)y / ChunkData.CHUNK_SIZE;
 //                     
 //                     if (currentHeight > terrainHeight)
 //                     {
@@ -105,7 +105,7 @@
 //         return lod0;
 //     }
 //
-//     private static Chunk GenerateChunkFromLod0(ref VoxelType[,,] lod0)
+//     private static ChunkData GenerateChunkFromLod0(ref VoxelType[,,] lod0)
 //     {
 //         ushort lodCount
 //     }

@@ -1,8 +1,8 @@
-using Voxen.Entities;
+using Voxen.Components;
 
-namespace Voxen.UnitTests;
+namespace Voxen.UnitTests.Components;
 
-public class Chunk_UnitTests
+public class ChunkData_UnitTests
 {
     [Fact]
     public void ChunkSizeShouldBeAFactorOf2()
@@ -11,7 +11,7 @@ public class Chunk_UnitTests
         // Verify
         //-----------------------------------------------------
         
-        Assert.True(Chunk.CHUNK_SIZE > 0);
-        Assert.Equal(0, Chunk.CHUNK_SIZE & (Chunk.CHUNK_SIZE - 1));
+        Assert.True(ChunkData.CHUNK_SIZE > 0);
+        Assert.Equal(0, ChunkData.CHUNK_SIZE & (ChunkData.CHUNK_SIZE - 1));
     }
 }
