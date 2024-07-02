@@ -2,7 +2,7 @@ using Voxen.Components;
 
 namespace Voxen.Entities;
 
-public struct Chunk : IEntity
+public class Chunk : IEntity
 {
     #region IEntity Properties
 
@@ -20,9 +20,12 @@ public struct Chunk : IEntity
 
     #region Constructors
 
-    public Chunk()
+    public Chunk(ChunkData chunkData)
     {
         Guid = Guid.NewGuid();
+
+        Data = chunkData;
+        RenderInformation = new ChunkRenderInformation(Data);
     }
 
     #endregion

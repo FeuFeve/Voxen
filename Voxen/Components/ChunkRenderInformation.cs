@@ -2,11 +2,11 @@ using OpenTK.Mathematics;
 
 namespace Voxen.Components;
 
-public struct ChunkRenderInformation
+public class ChunkRenderInformation
 {
     #region Constructors
 
-    public ChunkRenderInformation(ref ChunkData chunkData)
+    public ChunkRenderInformation(ChunkData chunkData)
     {
         ChunkModelMatrix = Matrix4.CreateTranslation(
             x: chunkData.ChunkCoordinates.X * BBOX_MAX_VALUE,

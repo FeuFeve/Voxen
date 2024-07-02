@@ -1,10 +1,9 @@
 ﻿using OpenTK.Mathematics;
-using Voxen.Entities;
 using Voxen.World;
 
 namespace Voxen.Components;
 
-public struct ChunkData
+public class ChunkData
 {
     #region Properties
 
