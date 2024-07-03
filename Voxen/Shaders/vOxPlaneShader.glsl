@@ -1,7 +1,6 @@
 #version 460
 
 uniform vec3 cameraPos;
-uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
@@ -19,7 +18,7 @@ void main()
     // The y component of the camera is ignored: we only want to displace the vertices on the XZ axes
     vec3 cameraCenteredVertexPos = vec3(vertexPosition.x + cameraPos.x, vertexPosition.y, vertexPosition.z + cameraPos.z);
     
-    fragPos = vec4(cameraCenteredVertexPos, 1.0f) * model;
+    fragPos = vec4(cameraCenteredVertexPos, 1.0f);
     
     gl_Position = vec4(cameraCenteredVertexPos, 1.0f) * view * projection;
 }

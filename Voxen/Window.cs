@@ -129,7 +129,6 @@ public class Window : GameWindow
             _oxPlaneShader.Use();
         
             _oxPlaneShader.SetVector3("cameraPos", _camera.Position);
-            _oxPlaneShader.SetMatrix4(CommonConstants.ShaderModelMatrixName, Matrix4.Identity);
             _oxPlaneShader.SetMatrix4(CommonConstants.ShaderViewMatrixName, _camera.GetViewMatrix());
             _oxPlaneShader.SetMatrix4(CommonConstants.ShaderProjectionMatrixName, _camera.GetProjectionMatrix());
         
