@@ -69,25 +69,25 @@ public class Window : GameWindow
         GL.VertexAttribPointer(vertexColorLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
 
         // Ox plane shader
-        _gridVertexArrayObject = GL.GenVertexArray();
-        GL.BindVertexArray((int)_gridVertexArrayObject);
+        _oxPlaneVertexArrayObject = GL.GenVertexArray();
+        GL.BindVertexArray((int)_oxPlaneVertexArrayObject);
 
-        int gridVertexBufferObject = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ArrayBuffer, gridVertexBufferObject);
-        GL.BufferData(BufferTarget.ArrayBuffer, _gridVertices.Length * sizeof(float), _gridVertices, BufferUsageHint.StaticDraw);
+        int oxPlaneVertexBufferObject = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, oxPlaneVertexBufferObject);
+        GL.BufferData(BufferTarget.ArrayBuffer, _oxPlaneVertices.Length * sizeof(float), _oxPlaneVertices, BufferUsageHint.StaticDraw);
 
-        int gridElementBufferObject = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, gridElementBufferObject);
-        GL.BufferData(BufferTarget.ElementArrayBuffer, _gridTriangleIndices.Length * sizeof(uint), _gridTriangleIndices, BufferUsageHint.StaticDraw);
+        int oxPlaneElementBufferObject = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, oxPlaneElementBufferObject);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, _oxPlaneTriangleIndices.Length * sizeof(uint), _oxPlaneTriangleIndices, BufferUsageHint.StaticDraw);
 
-        _gridShader = new Shader(
+        _oxPlaneShader = new Shader(
             "../../../Shaders/vOxPlaneShader.glsl",
             "../../../Shaders/fOxPlaneShader.glsl");
-        _gridShader.Use();
+        _oxPlaneShader.Use();
         
-        int gridVertexPositionLocation = _gridShader.GetAttribLocation("vertexPosition");
-        GL.EnableVertexAttribArray(gridVertexPositionLocation);
-        GL.VertexAttribPointer(gridVertexPositionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+        int oxPlaneVertexPositionLocation = _oxPlaneShader.GetAttribLocation("vertexPosition");
+        GL.EnableVertexAttribArray(oxPlaneVertexPositionLocation);
+        GL.VertexAttribPointer(oxPlaneVertexPositionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
 
         // We initialize the camera so that it is 3 units back from where the rectangle is.
         // We also give it the proper aspect ratio.
@@ -122,17 +122,18 @@ public class Window : GameWindow
             GL.DrawElements(PrimitiveType.Triangles, _triangleIndices.Length, DrawElementsType.UnsignedInt, 0);
         }
 
-        if (_gridVertexArrayObject is not null && _gridShader is not null)
+        if (_oxPlaneVertexArrayObject is not null && _oxPlaneShader is not null)
         {
-            GL.BindVertexArray((int)_gridVertexArrayObject);
+            GL.BindVertexArray((int)_oxPlaneVertexArrayObject);
         
-            _gridShader.Use();
+            _oxPlaneShader.Use();
         
-            // _gridShader.SetMatrix4(CommonConstants.ShaderModelMatrixName, Matrix4.Identity);
-            _gridShader.SetMatrix4(CommonConstants.ShaderViewMatrixName, _camera.GetViewMatrix());
-            _gridShader.SetMatrix4(CommonConstants.ShaderProjectionMatrixName, _camera.GetProjectionMatrix());
+            _oxPlaneShader.SetVector3("cameraPos", _camera.Position);
+            _oxPlaneShader.SetMatrix4(CommonConstants.ShaderModelMatrixName, Matrix4.Identity);
+            _oxPlaneShader.SetMatrix4(CommonConstants.ShaderViewMatrixName, _camera.GetViewMatrix());
+            _oxPlaneShader.SetMatrix4(CommonConstants.ShaderProjectionMatrixName, _camera.GetProjectionMatrix());
         
-            GL.DrawElements(PrimitiveType.Triangles, _gridTriangleIndices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(PrimitiveType.Triangles, _oxPlaneTriangleIndices.Length, DrawElementsType.UnsignedInt, 0);
         }
 
         SwapBuffers();
@@ -257,13 +258,13 @@ public class Window : GameWindow
     #region Fields
 
     private int? _vertexArrayObject;
-    private int? _gridVertexArrayObject;
+    private int? _oxPlaneVertexArrayObject;
     
     private bool _firstMove = true;
     private Vector2 _lastPos;
 
     private Shader? _shader;
-    private Shader? _gridShader;
+    private Shader? _oxPlaneShader;
     private Camera? _camera;
 
     #endregion
@@ -272,22 +273,19 @@ public class Window : GameWindow
 
     private readonly float[] _vertices =
     [
-        // // 20x20 flat gray plane
-        //  10.0f,   0.0f,  10.0f, 0.5f, 0.5f, 0.5f,
-        //  10.0f,   0.0f, -10.0f, 0.5f, 0.5f, 0.5f,
-        // -10.0f,   0.0f, -10.0f, 0.5f, 0.5f, 0.5f,
-        // -10.0f,   0.0f,  10.0f, 0.5f, 0.5f, 0.5f,
-        
+        // Left rainbow quad
         -1.5f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Top-right vertex
         -1.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom-right vertex
         -2.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f, // Bottom-left vertex
         -2.5f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Top-left vertex
          
+        // Middle rainbow quad
          0.5f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Top-right vertex
          0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom-right vertex
         -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f, // Bottom-left vertex
         -0.5f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Top-left vertex
          
+        // Right rainbow quad
          2.5f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Top-right vertex
          2.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom-right vertex
          1.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f, // Bottom-left vertex
@@ -296,28 +294,28 @@ public class Window : GameWindow
 
     private readonly uint[] _triangleIndices =
     [
+        // Left rainbow quad
         0, 1, 3, // Top-right triangle
         1, 2, 3, // Bottom-left triangle
         
+        // Middle rainbow quad
         4, 5, 7, // Top-right triangle
         5, 6, 7, // Bottom-left triangle
         
+        // Right rainbow quad
         8, 9, 11,  // Top-right triangle
         9, 10, 11, // Bottom-left triangle
-        
-        // 12, 13, 15, // Top-right triangle
-        // 13, 14, 15, // Bottom-left triangle
     ];
 
-    private readonly float[] _gridVertices =
+    private readonly float[] _oxPlaneVertices =
     [
-        -1.0f, -1.0f, 0.0f, // Bottom-left vertex
-        1.0f, -1.0f, 0.0f, // Bottom-right vertex
-        1.0f,  1.0f, 0.0f, // Top-right vertex
-        -1.0f,  1.0f, 0.0f, // Top-left vertex
+        -100.0f, 0.0f, -100.0f, // Bottom-left vertex
+         100.0f, 0.0f, -100.0f, // Bottom-right vertex
+         100.0f, 0.0f,  100.0f, // Top-right vertex
+        -100.0f, 0.0f,  100.0f, // Top-left vertex
     ];
 
-    private readonly uint[] _gridTriangleIndices =
+    private readonly uint[] _oxPlaneTriangleIndices =
     [
         0, 2, 1,
         0, 3, 2,
