@@ -68,9 +68,30 @@ public class Window : GameWindow
         GL.EnableVertexAttribArray(vertexColorLocation);
         GL.VertexAttribPointer(vertexColorLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
 
+        // Ox plane shader
+        _gridVertexArrayObject = GL.GenVertexArray();
+        GL.BindVertexArray((int)_gridVertexArrayObject);
+
+        int gridVertexBufferObject = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, gridVertexBufferObject);
+        GL.BufferData(BufferTarget.ArrayBuffer, _gridVertices.Length * sizeof(float), _gridVertices, BufferUsageHint.StaticDraw);
+
+        int gridElementBufferObject = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, gridElementBufferObject);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, _gridTriangleIndices.Length * sizeof(uint), _gridTriangleIndices, BufferUsageHint.StaticDraw);
+
+        _gridShader = new Shader(
+            "../../../Shaders/vOxPlaneShader.glsl",
+            "../../../Shaders/fOxPlaneShader.glsl");
+        _gridShader.Use();
+        
+        int gridVertexPositionLocation = _gridShader.GetAttribLocation("vertexPosition");
+        GL.EnableVertexAttribArray(gridVertexPositionLocation);
+        GL.VertexAttribPointer(gridVertexPositionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
         // We initialize the camera so that it is 3 units back from where the rectangle is.
         // We also give it the proper aspect ratio.
-        _camera = new Camera(new Vector3(0.0f, 2.0f, 3.0f), Size.X / (float)Size.Y);
+        _camera = new Camera(new Vector3(0.0f, 1.0f, 3.0f), Size.X / (float)Size.Y);
 
         // We make the mouse cursor invisible and captured so we can have proper FPS-camera movement.
         CursorState = CursorState.Grabbed;
@@ -80,7 +101,7 @@ public class Window : GameWindow
     {
         base.OnRenderFrame(e);
 
-        if (_vertexArrayObject is null || _shader is null)
+        if (_camera is null)
         {
             return;
         }
@@ -88,20 +109,31 @@ public class Window : GameWindow
         // We clear the depth buffer in addition to the color buffer.
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        GL.BindVertexArray((int)_vertexArrayObject);
-
-        _shader.Use();
-
-        if (_camera is null)
+        if (_vertexArrayObject is not null && _shader is not null)
         {
-            return;
-        }
-        
-        _shader.SetMatrix4(CommonConstants.ShaderModelMatrixName, Matrix4.Identity);
-        _shader.SetMatrix4(CommonConstants.ShaderViewMatrixName, _camera.GetViewMatrix());
-        _shader.SetMatrix4(CommonConstants.ShaderProjectionMatrixName, _camera.GetProjectionMatrix());
+            GL.BindVertexArray((int)_vertexArrayObject);
 
-        GL.DrawElements(PrimitiveType.Triangles, _triangleIndices.Length, DrawElementsType.UnsignedInt, 0);
+            _shader.Use();
+        
+            _shader.SetMatrix4(CommonConstants.ShaderModelMatrixName, Matrix4.Identity);
+            _shader.SetMatrix4(CommonConstants.ShaderViewMatrixName, _camera.GetViewMatrix());
+            _shader.SetMatrix4(CommonConstants.ShaderProjectionMatrixName, _camera.GetProjectionMatrix());
+
+            GL.DrawElements(PrimitiveType.Triangles, _triangleIndices.Length, DrawElementsType.UnsignedInt, 0);
+        }
+
+        if (_gridVertexArrayObject is not null && _gridShader is not null)
+        {
+            GL.BindVertexArray((int)_gridVertexArrayObject);
+        
+            _gridShader.Use();
+        
+            // _gridShader.SetMatrix4(CommonConstants.ShaderModelMatrixName, Matrix4.Identity);
+            _gridShader.SetMatrix4(CommonConstants.ShaderViewMatrixName, _camera.GetViewMatrix());
+            _gridShader.SetMatrix4(CommonConstants.ShaderProjectionMatrixName, _camera.GetProjectionMatrix());
+        
+            GL.DrawElements(PrimitiveType.Triangles, _gridTriangleIndices.Length, DrawElementsType.UnsignedInt, 0);
+        }
 
         SwapBuffers();
     }
@@ -225,11 +257,13 @@ public class Window : GameWindow
     #region Fields
 
     private int? _vertexArrayObject;
+    private int? _gridVertexArrayObject;
     
     private bool _firstMove = true;
     private Vector2 _lastPos;
 
     private Shader? _shader;
+    private Shader? _gridShader;
     private Camera? _camera;
 
     #endregion
@@ -238,11 +272,11 @@ public class Window : GameWindow
 
     private readonly float[] _vertices =
     [
-        // 20x20 flat gray plane
-         10.0f,   0.0f,  10.0f, 0.5f, 0.5f, 0.5f,
-         10.0f,   0.0f, -10.0f, 0.5f, 0.5f, 0.5f,
-        -10.0f,   0.0f, -10.0f, 0.5f, 0.5f, 0.5f,
-        -10.0f,   0.0f,  10.0f, 0.5f, 0.5f, 0.5f,
+        // // 20x20 flat gray plane
+        //  10.0f,   0.0f,  10.0f, 0.5f, 0.5f, 0.5f,
+        //  10.0f,   0.0f, -10.0f, 0.5f, 0.5f, 0.5f,
+        // -10.0f,   0.0f, -10.0f, 0.5f, 0.5f, 0.5f,
+        // -10.0f,   0.0f,  10.0f, 0.5f, 0.5f, 0.5f,
         
         -1.5f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Top-right vertex
         -1.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom-right vertex
@@ -271,8 +305,22 @@ public class Window : GameWindow
         8, 9, 11,  // Top-right triangle
         9, 10, 11, // Bottom-left triangle
         
-        12, 13, 15, // Top-right triangle
-        13, 14, 15, // Bottom-left triangle
+        // 12, 13, 15, // Top-right triangle
+        // 13, 14, 15, // Bottom-left triangle
+    ];
+
+    private readonly float[] _gridVertices =
+    [
+        -1.0f, -1.0f, 0.0f, // Bottom-left vertex
+        1.0f, -1.0f, 0.0f, // Bottom-right vertex
+        1.0f,  1.0f, 0.0f, // Top-right vertex
+        -1.0f,  1.0f, 0.0f, // Top-left vertex
+    ];
+
+    private readonly uint[] _gridTriangleIndices =
+    [
+        0, 2, 1,
+        0, 3, 2,
     ];
 
     #endregion
