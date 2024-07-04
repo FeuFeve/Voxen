@@ -3,11 +3,12 @@
 float near = 0.01f;
 float far = 20.0f;
 
+uniform mat4 view;
+uniform mat4 projection;
+
 layout(location = 0) out vec4 outColor;
 
-layout(location = 1) in vec4 fragPos;
-layout(location = 3) in mat4 fragView;
-layout(location = 7) in mat4 fragProj;
+layout(location = 1) in vec3 fragPos;
 
 vec4 Grid(vec3 fragPos3D, float scale, bool drawAxis)
 {
@@ -44,7 +45,7 @@ vec4 Grid(vec3 fragPos3D, float scale, bool drawAxis)
 
 float ComputeLinearDepth(vec3 pos)
 {
-    vec4 clipSpacePos = vec4(pos, 1.0f) * fragView * fragProj;
+    vec4 clipSpacePos = vec4(pos, 1.0f) * view * projection;
     float clipSpaceDepth = (clipSpacePos.z / clipSpacePos.w) * 2.0 - 1.0; // put back between -1 and 1
     float linearDepth = (2.0f * near * far) / (far + near - clipSpaceDepth * (far - near)); // get linear value between near and far
     return linearDepth / far; // normalize
@@ -53,15 +54,15 @@ float ComputeLinearDepth(vec3 pos)
 void main()
 {
     // Generate a first 1x1 grid
-    outColor = Grid(fragPos.xyz, 1.0f, false);
+    outColor = Grid(fragPos, 1.0f, false);
     
     // Fade the 1x1 intensity out (adjust as needed)
     outColor.a *= 0.2f;
     
     // Generate a second 10x10 grid and add it to the first
-    outColor += Grid(fragPos.xyz, 10.0f, true);
+    outColor += Grid(fragPos, 10.0f, true);
     
-    float linearDepth = ComputeLinearDepth(fragPos.xyz);
+    float linearDepth = ComputeLinearDepth(fragPos);
     
     // Fade de grid out as it get farther from the camera (adjust as needed)
     float maxAlpha = 0.7f;
