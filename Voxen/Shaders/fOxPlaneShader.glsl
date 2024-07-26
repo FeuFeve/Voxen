@@ -64,7 +64,7 @@ void main()
     
     float linearDepth = ComputeLinearDepth(fragPos);
     
-    // Fade de grid out as it get farther from the camera (adjust as needed)
+    // Fade the grid out as it gets farther from the camera (adjust as needed)
     float maxAlpha = 0.7f;
     float fading = max(0.0f, maxAlpha - linearDepth);
 

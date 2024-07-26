@@ -3,6 +3,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Windowing.Desktop;
+using Voxen.Utilities.Inputs;
 
 namespace Voxen;
 
@@ -25,6 +26,9 @@ public class Window : GameWindow
     protected override void OnLoad()
     {
         base.OnLoad();
+        
+        Console.WriteLine("Test");
+        KeyMapRegistry registry = KeyMapRegistry.Instance;
 
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
