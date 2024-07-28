@@ -1,3 +1,4 @@
+using GenericInputSystem;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -19,6 +20,9 @@ public class Window : GameWindow
         UpdateFrequency = 60.0;
         Title = "Voxen";
         WindowState = WindowState.Fullscreen;
+        
+        // Input binding registries
+        InputSystem.Register(new GeneralInputBindingRegistry("General"));
     }
 
     #endregion
@@ -26,9 +30,6 @@ public class Window : GameWindow
     protected override void OnLoad()
     {
         base.OnLoad();
-        
-        Console.WriteLine("Test");
-        KeyMapRegistry registry = KeyMapRegistry.Instance;
 
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 

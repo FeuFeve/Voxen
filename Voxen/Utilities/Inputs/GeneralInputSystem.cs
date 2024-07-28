@@ -1,18 +1,26 @@
+using GenericInputSystem;
+using GenericInputSystem.Attributes;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Voxen.Utilities.Inputs;
 
-public static class GeneralInputSystem
+public class GeneralInputBindingRegistry : InputBindingRegistry<Keys>
 {
-    [KeyBindingCommand(Keys.LeftControl, Keys.S)] public static event Action? SaveCommand;
-    [KeyBindingCommand(Keys.LeftControl, Keys.LeftShift, Keys.S)] public static event Action? OpenSettingsCommand;
+    #region Commands
 
-    // public static event EventHandler? Save;
-    //
-    // public static void Execute()
-    // {
-    //     Save += () => Console.WriteLine("Save executed");
-    //     
-    //     Save.Invoke();
-    // }
+    [KeyBindingCommand<Keys>(Keys.LeftControl, Keys.S)]
+    public static event Action? SaveCommand;
+
+    [KeyBindingCommand<Keys>(Keys.LeftControl, Keys.LeftShift, Keys.S)]
+    public static event Action? OpenSettingsCommand;
+
+    #endregion
+
+    #region Constructor
+
+    public GeneralInputBindingRegistry(string name) : base(name)
+    {
+    }
+
+    #endregion
 }
