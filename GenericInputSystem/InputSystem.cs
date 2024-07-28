@@ -3,11 +3,11 @@ using GenericInputSystem.Attributes;
 
 namespace GenericInputSystem;
 
-public static class InputSystem
+public static class InputSystem<TKey> where TKey : Enum
 {
     #region Public static methods
 
-    public static void Register<TKey>(InputBindingRegistry<TKey> registry) where TKey : Enum
+    public static void Register(InputBindingRegistry<TKey> registry)
     {
         Console.WriteLine($"Registering new {nameof(InputBindingRegistry<TKey>)}: {registry.Name}");
         
@@ -30,6 +30,18 @@ public static class InputSystem
             Console.WriteLine($"Bound to keys: {string.Join(", ", keyBindingCommandAttribute.Keys)}");
         }
     }
+
+    public static void OnKeyDown(TKey key)
+    {
+        _keysPressed[key]
+    }
+
+    #endregion
+
+    #region Private static variables
+
+    private static bool[] _keyState = new bool[Enum.GetValues(typeof(TKey)).Length];
+    private static TKey[] _keysPressed = [];
 
     #endregion
 }
