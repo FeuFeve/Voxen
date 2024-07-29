@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using GenericInputSystem.Attributes;
 
 namespace GenericInputSystem;
@@ -7,10 +8,18 @@ public static class InputSystem<TKey> where TKey : Enum
 {
     #region Public static methods
 
-    public static void Register(InputBindingRegistry<TKey> registry)
+    public static void AddRegistry(InputBindingRegistry<TKey> registry)
     {
-        Console.WriteLine($"Registering new {nameof(InputBindingRegistry<TKey>)}: {registry.Name}");
-        
+        WriteToConsole($"Registering {nameof(InputBindingRegistry<TKey>)}: {registry.Name}");
+
+        if (!IsNewRegistry(registry))
+        {
+            // We should not try to add an already existing registry 
+            Debug.Assert(false);
+
+            return;
+        }
+
         EventInfo[] commands = registry.GetType().GetEvents(BindingFlags.Static | BindingFlags.Public);
 
         foreach (EventInfo command in commands)
@@ -22,6 +31,10 @@ public static class InputSystem<TKey> where TKey : Enum
             if (attributes.Length != 1)
             {
                 Console.WriteLine($"Command '{command}' does not have an associated {nameof(KeyBindingCommandAttribute<TKey>)}");
+                
+                // All events should have only one KeyBindingCommandAttribute
+                Debug.Assert(false);
+                
                 break;
             }
 
@@ -29,6 +42,8 @@ public static class InputSystem<TKey> where TKey : Enum
 
             Console.WriteLine($"Bound to keys: {string.Join(", ", keyBindingCommandAttribute.Keys)}");
         }
+        
+        s_registries.Add(registry);
     }
 
     public static void OnKeyDown(TKey key)
@@ -37,7 +52,7 @@ public static class InputSystem<TKey> where TKey : Enum
         {
             // TODO: check for commands
         }
-        
+
         // TODO: check for inputs
     }
 
@@ -48,9 +63,30 @@ public static class InputSystem<TKey> where TKey : Enum
 
     #endregion
 
+    #region Private static mehods
+
+    private static void WriteToConsole(string message)
+    {
+        Console.WriteLine($"{nameof(InputSystem<TKey>)}: {message}");
+    }
+
+    private static bool IsNewRegistry(InputBindingRegistry<TKey> registry)
+    {
+        if (s_registries.Any(existingRegistry => existingRegistry.Name == registry.Name))
+        {
+            return false;
+        }
+
+        return !s_registries.Contains(registry);
+    }
+
+    #endregion
+
     #region Private static variables
 
     private static readonly HashSet<TKey> s_keysPressed = [];
+
+    private static List<InputBindingRegistry<TKey>> s_registries = new();
 
     #endregion
 }

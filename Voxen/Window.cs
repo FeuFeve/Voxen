@@ -22,7 +22,7 @@ public class Window : GameWindow
         WindowState = WindowState.Fullscreen;
         
         // Input binding registries
-        InputSystem<Keys>.Register(new GeneralInputBindingRegistry("General"));
+        InputSystem<Keys>.AddRegistry(new GeneralInputBindingRegistry("General"));
     }
 
     #endregion
