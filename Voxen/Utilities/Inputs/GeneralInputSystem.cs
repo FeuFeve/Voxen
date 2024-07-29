@@ -18,9 +18,7 @@ public class GeneralInputBindingRegistry : InputBindingRegistry<Keys>
 
     #region Constructor
 
-    public GeneralInputBindingRegistry(string name) : base(name)
-    {
-    }
+    public GeneralInputBindingRegistry(string name) : base(name) { }
 
     #endregion
 }

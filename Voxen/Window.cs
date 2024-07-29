@@ -27,6 +27,8 @@ public class Window : GameWindow
 
     #endregion
 
+    #region GameWindow overriden methods
+    
     protected override void OnLoad()
     {
         base.OnLoad();
@@ -173,6 +175,22 @@ public class Window : GameWindow
             _camera.Fov -= e.OffsetY;
         }
     }
+
+    protected override void OnKeyDown(KeyboardKeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        
+        InputSystem<Keys>.OnKeyDown(e.Key);
+    }
+
+    protected override void OnKeyUp(KeyboardKeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+        
+        InputSystem<Keys>.OnKeyUp(e.Key);
+    }
+
+    #endregion
 
     #region Private methods
 

@@ -33,15 +33,24 @@ public static class InputSystem<TKey> where TKey : Enum
 
     public static void OnKeyDown(TKey key)
     {
-        _keysPressed[key]
+        if (s_keysPressed.Add(key))
+        {
+            // TODO: check for commands
+        }
+        
+        // TODO: check for inputs
+    }
+
+    public static void OnKeyUp(TKey key)
+    {
+        s_keysPressed.Remove(key);
     }
 
     #endregion
 
     #region Private static variables
 
-    private static bool[] _keyState = new bool[Enum.GetValues(typeof(TKey)).Length];
-    private static TKey[] _keysPressed = [];
+    private static readonly HashSet<TKey> s_keysPressed = [];
 
     #endregion
 }
