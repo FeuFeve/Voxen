@@ -9,10 +9,21 @@ public class GeneralInputBindingRegistry : InputBindingRegistry<Keys>
     #region Commands
 
     [KeyBindingCommand<Keys>(Keys.LeftControl, Keys.S)]
-    public static event Action? SaveCommand;
+    public event Action? SaveCommand;
 
     [KeyBindingCommand<Keys>(Keys.LeftControl, Keys.LeftShift, Keys.S)]
-    public static event Action? OpenSettingsCommand;
+    public event Action? OpenSettingsCommand;
+
+    // TODO: remove these methods (for debug)
+    public void OnSaveCommand()
+    {
+        SaveCommand?.Invoke();
+    }
+
+    public void OnOpenSettingsCommand()
+    {
+        OpenSettingsCommand?.Invoke();
+    }
 
     #endregion
 

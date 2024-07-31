@@ -22,7 +22,12 @@ public class Window : GameWindow
         WindowState = WindowState.Fullscreen;
         
         // Input binding registries
-        InputSystem<Keys>.AddRegistry(new GeneralInputBindingRegistry("General"));
+        GeneralInputBindingRegistry generalInputBindingRegistry = new("General"); // TODO: merge with next line (for debug)
+        InputSystem<Keys>.AddRegistry(generalInputBindingRegistry);
+
+        // TODO: remove (for debug)
+        generalInputBindingRegistry.SaveCommand += () => Console.WriteLine("SaveCommand was called");
+        generalInputBindingRegistry.OnSaveCommand();
     }
 
     #endregion

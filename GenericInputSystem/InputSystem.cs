@@ -20,17 +20,17 @@ public static class InputSystem<TKey> where TKey : Enum
             return;
         }
 
-        EventInfo[] commands = registry.GetType().GetEvents(BindingFlags.Static | BindingFlags.Public);
+        EventInfo[] commands = registry.GetType().GetEvents(BindingFlags.Instance | BindingFlags.Public);
 
         foreach (EventInfo command in commands)
         {
-            Console.WriteLine(command);
+            WriteToConsole(command);
 
             object[] attributes = command.GetCustomAttributes(typeof(KeyBindingCommandAttribute<TKey>), false);
 
             if (attributes.Length != 1)
             {
-                Console.WriteLine($"Command '{command}' does not have an associated {nameof(KeyBindingCommandAttribute<TKey>)}");
+                WriteToConsole($"Command '{command}' does not have an associated {nameof(KeyBindingCommandAttribute<TKey>)}");
                 
                 // All events should have only one KeyBindingCommandAttribute
                 Debug.Assert(false);
@@ -38,9 +38,34 @@ public static class InputSystem<TKey> where TKey : Enum
                 break;
             }
 
+            FieldInfo? fieldInfo = registry.GetType().GetField(command.Name, BindingFlags.Instance | BindingFlags.Public);
+            // TODO: investigate why fieldInfo is always null here
+            if (fieldInfo is null)
+            {
+                // All events should have an associated field
+                Debug.Assert(false);
+                
+                break;
+            }
+
+            Delegate? eventDelegate = (Delegate?)fieldInfo.GetValue(null);
+            
+            if (eventDelegate is null)
+            {
+                // All events should have an associated Delegate
+                Debug.Assert(false);
+                
+                break;
+            }
+
             KeyBindingCommandAttribute<TKey> keyBindingCommandAttribute = (KeyBindingCommandAttribute<TKey>)attributes[0];
 
-            Console.WriteLine($"Bound to keys: {string.Join(", ", keyBindingCommandAttribute.Keys)}");
+            WriteToConsole($"Bound to keys: {string.Join(", ", keyBindingCommandAttribute.Keys)}");
+            
+            foreach (Delegate handler in eventDelegate.GetInvocationList())
+            {
+                WriteToConsole($"Delegate: {handler.Method.Name}");
+            }
         }
         
         s_registries.Add(registry);
@@ -50,7 +75,7 @@ public static class InputSystem<TKey> where TKey : Enum
     {
         if (s_keysPressed.Add(key))
         {
-            // TODO: check for commands
+            CheckForCommands();
         }
 
         // TODO: check for inputs
@@ -65,7 +90,7 @@ public static class InputSystem<TKey> where TKey : Enum
 
     #region Private static mehods
 
-    private static void WriteToConsole(string message)
+    private static void WriteToConsole(object message)
     {
         Console.WriteLine($"{nameof(InputSystem<TKey>)}: {message}");
     }
@@ -78,6 +103,14 @@ public static class InputSystem<TKey> where TKey : Enum
         }
 
         return !s_registries.Contains(registry);
+    }
+
+    private static void CheckForCommands()
+    {
+        TKey[] keysPressed = s_keysPressed.ToArray();
+        Array.Sort(keysPressed);
+        
+        // TODO: check for commands using the Command class?
     }
 
     #endregion
