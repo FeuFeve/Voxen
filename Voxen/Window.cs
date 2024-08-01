@@ -21,13 +21,13 @@ public class Window : GameWindow
         Title = "Voxen";
         WindowState = WindowState.Fullscreen;
         
+        // TODO: remove (for debug)
+        GeneralInputBindingRegistry.SaveCommand += () => Console.WriteLine("SaveCommand was called");
+        GeneralInputBindingRegistry.SaveCommand += () => Console.WriteLine("SaveCommand was called (other handler)");
+        
         // Input binding registries
         GeneralInputBindingRegistry generalInputBindingRegistry = new("General"); // TODO: merge with next line (for debug)
         InputSystem<Keys>.AddRegistry(generalInputBindingRegistry);
-
-        // TODO: remove (for debug)
-        generalInputBindingRegistry.SaveCommand += () => Console.WriteLine("SaveCommand was called");
-        generalInputBindingRegistry.OnSaveCommand();
     }
 
     #endregion

@@ -14,60 +14,62 @@ public static class InputSystem<TKey> where TKey : Enum
 
         if (!IsNewRegistry(registry))
         {
-            // We should not try to add an already existing registry 
+            // We should not try to add an already existing registry
+            WriteToConsole($"Warning: trying to add an already registered {nameof(InputBindingRegistry<TKey>)}. Ignored this registry");
             Debug.Assert(false);
-
             return;
         }
 
-        EventInfo[] commands = registry.GetType().GetEvents(BindingFlags.Instance | BindingFlags.Public);
+        Type registryType = registry.GetType();
+        EventInfo[] eventInfos = registryType.GetEvents(BindingFlags.Static | BindingFlags.Public);
 
-        foreach (EventInfo command in commands)
+        foreach (EventInfo eventInfo in eventInfos)
         {
-            WriteToConsole(command);
+            WriteToConsole(eventInfo);
 
-            object[] attributes = command.GetCustomAttributes(typeof(KeyBindingCommandAttribute<TKey>), false);
+            KeyBindingCommandAttribute<TKey>[] keyBindingCommandAttributes = eventInfo
+                .GetCustomAttributes<KeyBindingCommandAttribute<TKey>>()
+                .ToArray();
 
-            if (attributes.Length != 1)
+            if (keyBindingCommandAttributes.Length != 1)
             {
-                WriteToConsole($"Command '{command}' does not have an associated {nameof(KeyBindingCommandAttribute<TKey>)}");
-                
-                // All events should have only one KeyBindingCommandAttribute
+                WriteToConsole($"Event '{eventInfo}' has {keyBindingCommandAttributes.Length} associated {nameof(KeyBindingCommandAttribute<TKey>)} (expected 1)");
                 Debug.Assert(false);
-                
-                break;
+                continue;
             }
-
-            FieldInfo? fieldInfo = registry.GetType().GetField(command.Name, BindingFlags.Instance | BindingFlags.Public);
-            // TODO: investigate why fieldInfo is always null here
-            if (fieldInfo is null)
-            {
-                // All events should have an associated field
-                Debug.Assert(false);
-                
-                break;
-            }
-
-            Delegate? eventDelegate = (Delegate?)fieldInfo.GetValue(null);
             
+            KeyBindingCommandAttribute<TKey> keyBindingCommandAttribute = keyBindingCommandAttributes[0];
+            WriteToConsole($"Bound to keys: {string.Join(", ", keyBindingCommandAttribute.Keys)}");
+
+            // Find the backing field for this event
+            FieldInfo? eventBackingFieldInfo = registryType.GetField(eventInfo.Name, BindingFlags.Static | BindingFlags.NonPublic);
+
+            if (eventBackingFieldInfo is null)
+            {
+                WriteToConsole($"Could not find a backing field for '{eventInfo}'");
+                Debug.Assert(false);
+                break;
+            }
+
+            var eventDelegate = (Delegate?)eventBackingFieldInfo.GetValue(null);
+
             if (eventDelegate is null)
             {
-                // All events should have an associated Delegate
-                Debug.Assert(false);
-                
-                break;
+                continue;
             }
 
-            KeyBindingCommandAttribute<TKey> keyBindingCommandAttribute = (KeyBindingCommandAttribute<TKey>)attributes[0];
-
-            WriteToConsole($"Bound to keys: {string.Join(", ", keyBindingCommandAttribute.Keys)}");
-            
             foreach (Delegate handler in eventDelegate.GetInvocationList())
             {
                 WriteToConsole($"Delegate: {handler.Method.Name}");
             }
+            
+            // TODO: store the registry type, the keys bound to the attribute, and the event delegate, so we can ...
+            // check and invoke the various delegate bound to the event
+            // Note: verify that storing the delegate is ok: if we store it and someone attaches itself to the event
+            // afterwards, does the delegate "invocation list" reflects these changes?
+            // If not: we might need to store the event backing field info (not even sure about that)
         }
-        
+
         s_registries.Add(registry);
     }
 
@@ -109,7 +111,7 @@ public static class InputSystem<TKey> where TKey : Enum
     {
         TKey[] keysPressed = s_keysPressed.ToArray();
         Array.Sort(keysPressed);
-        
+
         // TODO: check for commands using the Command class?
     }
 
