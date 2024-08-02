@@ -37,8 +37,6 @@ public static class InputSystem<TKey> where TKey : Enum
         {
             CheckForCommands();
         }
-
-        // TODO: check for inputs
     }
 
     public static void OnKeyUp(TKey key)
@@ -135,10 +133,43 @@ public static class InputSystem<TKey> where TKey : Enum
 
     private static void CheckForCommands()
     {
+        if (s_keysPressed.Count == 0)
+        {
+            return;
+        }
+        
         TKey[] keysPressed = s_keysPressed.ToArray();
         Array.Sort(keysPressed);
 
-        // TODO: definitely move that into its own logic-related class
+        foreach (CommandRegistry<TKey> commandRegistry in s_commandRegistries)
+        {
+            if (!commandRegistry.InputBindingRegistry.IsEnabled)
+            {
+                return;
+            }
+
+            foreach (Command<TKey> command in commandRegistry.Commands)
+            {
+                if (!command.Keys.SequenceEqual(keysPressed))
+                {
+                    continue;
+                }
+                
+                var eventDelegate = (Delegate?)command.EventBackingFieldInfo.GetValue(null);
+
+                if (eventDelegate is null)
+                {
+                    return;
+                }
+
+                foreach (Delegate eventHandler in eventDelegate.GetInvocationList())
+                {
+                    eventHandler.DynamicInvoke();
+                }
+
+                break;
+            }
+        }
     }
 
     #endregion

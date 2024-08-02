@@ -6,6 +6,8 @@ public abstract class InputBindingRegistry<TKey> where TKey : Enum
 
     public string Name { get; }
 
+    public bool IsEnabled { get; set; } = true;
+
     #endregion
 
     #region Constructor
