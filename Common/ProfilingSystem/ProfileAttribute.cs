@@ -8,7 +8,7 @@ public class ProfileAttribute : OverrideMethodAspect
 
     public override dynamic? OverrideMethod()
     {
-        Profiler.AddToStack(meta.Target.Method.Name);
+        Profiler.AddToStack(meta.Target.Method.ToString());
 
         try
         {
@@ -16,7 +16,7 @@ public class ProfileAttribute : OverrideMethodAspect
         }
         finally
         {
-            Profiler.RemoveFromStack(meta.Target.Method.Name);
+            Profiler.RemoveFromStack(meta.Target.Method.ToString());
         }
     }
 

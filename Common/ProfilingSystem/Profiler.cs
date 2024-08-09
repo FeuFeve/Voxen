@@ -9,8 +9,13 @@ public static class Profiler
 
     [Conditional("DEBUG")]
     [Conditional("PROFILE")]
-    public static void AddToStack(string methodName)
+    public static void AddToStack(string? methodName)
     {
+        if (methodName is null)
+        {
+            return;
+        }
+        
         MethodCallData methodCallData = new()
         {
             MethodName = methodName,
@@ -24,8 +29,13 @@ public static class Profiler
 
     [Conditional("DEBUG")]
     [Conditional("PROFILE")]
-    public static void RemoveFromStack(string methodName)
+    public static void RemoveFromStack(string? methodName)
     {
+        if (methodName is null)
+        {
+            return;
+        }
+
         MethodCallData methodCallData = s_stack.Pop();
         int methodExecTimeMs = (int)(DateTime.Now - methodCallData.MethodStartCallTime).TotalMilliseconds;
 
