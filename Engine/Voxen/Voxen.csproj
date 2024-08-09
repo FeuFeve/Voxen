@@ -16,6 +16,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Common\InputSystem\InputSystem.csproj" />
+      <ProjectReference Include="..\..\Common\ProfilingSystem\ProfilingSystem.csproj" />
     </ItemGroup>
 
 </Project>

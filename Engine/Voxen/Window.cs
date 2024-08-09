@@ -4,6 +4,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Windowing.Desktop;
+using ProfilingSystem;
 using Voxen.Utilities.Inputs;
 
 namespace Voxen;
@@ -34,6 +35,7 @@ public class Window : GameWindow
 
     #region GameWindow overriden methods
     
+    [Profile]
     protected override void OnLoad()
     {
         base.OnLoad();
