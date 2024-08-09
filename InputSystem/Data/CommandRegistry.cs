@@ -1,4 +1,4 @@
-namespace GenericInputSystem.Data;
+namespace InputSystem.Data;
 
 internal class CommandRegistry<TKey> where TKey : Enum
 {

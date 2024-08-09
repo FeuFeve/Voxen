@@ -1,5 +1,5 @@
-using GenericInputSystem;
-using GenericInputSystem.Attributes;
+using InputSystem;
+using InputSystem.Attributes;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Voxen.Utilities.Inputs;

@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\GenericInputSystem\GenericInputSystem.csproj" />
+      <ProjectReference Include="..\InputSystem\InputSystem.csproj" />
     </ItemGroup>
 
 </Project>

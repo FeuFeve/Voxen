@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxen", "Voxen\Voxen.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxen.UnitTests", "Voxen.UnitTests\Voxen.UnitTests.csproj", "{0C6039A5-4256-4507-B3C6-B8F80FF67E42}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericInputSystem", "GenericInputSystem\GenericInputSystem.csproj", "{701F56A5-C96D-4CCF-8658-81AF28088DA4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InputSystem", "InputSystem\InputSystem.csproj", "{701F56A5-C96D-4CCF-8658-81AF28088DA4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

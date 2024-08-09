@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using GenericInputSystem.Attributes;
-using GenericInputSystem.Data;
+using InputSystem.Attributes;
+using InputSystem.Data;
 
-namespace GenericInputSystem;
+namespace InputSystem;
 
 // TODO: keep as little code/data in this class as possible. InputSystem is the entry point: we want users trying to
 // understand how it works to be lost in large amounts of code

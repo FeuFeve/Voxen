@@ -1,4 +1,4 @@
-﻿namespace GenericInputSystem;
+﻿namespace InputSystem;
 
 public abstract class InputBindingRegistry<TKey> where TKey : Enum
 {

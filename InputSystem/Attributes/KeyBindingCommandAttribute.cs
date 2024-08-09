@@ -1,4 +1,4 @@
-namespace GenericInputSystem.Attributes;
+namespace InputSystem.Attributes;
 
 [AttributeUsage(AttributeTargets.Event, AllowMultiple = true)]
 public class KeyBindingCommandAttribute<TKey>

@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace GenericInputSystem.Data;
+namespace InputSystem.Data;
 
 internal class Command<TKey> where TKey : Enum
 {
