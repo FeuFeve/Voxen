@@ -1,4 +1,5 @@
 using InputSystem;
+using Logger;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -17,6 +18,13 @@ public class Window : GameWindow
 
     public Window() : base(GameWindowSettings.Default, NativeWindowSettings.Default)
     {
+        Serilog.Log.Verbose("This is a test {@myBool} {@myVal} {@myName}", true, 123, nameof(Window));
+        Serilog.Log.Debug("This is a test");
+        Serilog.Log.Information("This is a test");
+        Serilog.Log.Warning("This is a test");
+        Serilog.Log.Error("This is a test");
+        Serilog.Log.Fatal("This is a test");
+        
         UpdateFrequency = 60.0;
         Title = "Voxen";
         WindowState = WindowState.Fullscreen;

@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using InputSystem.Attributes;
 using InputSystem.Data;
+using Logger;
 
 namespace InputSystem;
 
@@ -14,7 +15,7 @@ public static class InputSystem<TKey> where TKey : Enum
 
     public static void AddRegistry(InputBindingRegistry<TKey> inputBindingRegistry)
     {
-        WriteToConsole($"Registering {nameof(InputBindingRegistry<TKey>)}: {inputBindingRegistry.Name}");
+        Log.Information($"Registering {nameof(InputBindingRegistry<TKey>)}: {inputBindingRegistry.Name}");
 
         if (!TryAddCommandRegistry(inputBindingRegistry, out CommandRegistry<TKey>? commandRegistry))
         {
@@ -48,17 +49,11 @@ public static class InputSystem<TKey> where TKey : Enum
 
     #region Private static mehods
 
-    // TODO: replace with a logger class that will use Serilog
-    private static void WriteToConsole(object message)
-    {
-        Console.WriteLine($"{nameof(InputSystem<TKey>)}: {message}");
-    }
-
     private static bool TryAddCommandRegistry(InputBindingRegistry<TKey> registry, [NotNullWhen(true)] out CommandRegistry<TKey>? commandRegistry)
     {
         if (s_commandRegistries.Any(existingCommandRegistry => existingCommandRegistry.InputBindingRegistry.Name == registry.Name))
         {
-            WriteToConsole($"Warning: trying to add an already registered {nameof(InputBindingRegistry<TKey>)}. Ignored this registry");
+            Log.Warning($"Trying to add an already registered {nameof(InputBindingRegistry<TKey>)}. Ignored this registry");
             Debug.Assert(false);
             commandRegistry = null;
             return false;
@@ -75,7 +70,7 @@ public static class InputSystem<TKey> where TKey : Enum
 
     private static void RegisterCommand(EventInfo eventInfo, CommandRegistry<TKey> commandRegistry)
     {
-        WriteToConsole(eventInfo); // TODO: remove (debug)
+        Log.Information($"{eventInfo}"); // TODO: remove (debug)
 
         // Find the backing field for this event
         Type registryType = commandRegistry.InputBindingRegistry.GetType();
@@ -83,7 +78,7 @@ public static class InputSystem<TKey> where TKey : Enum
 
         if (eventBackingFieldInfo is null)
         {
-            WriteToConsole($"Could not find a backing field for '{eventInfo}'");
+            Log.Warning($"Could not find a backing field for '{eventInfo}'");
             Debug.Assert(false);
             return;
         }
@@ -102,7 +97,7 @@ public static class InputSystem<TKey> where TKey : Enum
 
         if (keyBindingCommandAttributes.Length == 0)
         {
-            WriteToConsole($"Event '{eventInfo}' has 0 associated {nameof(KeyBindingCommandAttribute<TKey>)} (expected at least 1)");
+            Log.Warning($"Event '{eventInfo}' has 0 associated {nameof(KeyBindingCommandAttribute<TKey>)} (expected at least 1)");
             Debug.Assert(false);
             return;
         }
@@ -110,7 +105,7 @@ public static class InputSystem<TKey> where TKey : Enum
         // For each KeyBindingCommandAttribute, add its keys to the command's key combinations
         foreach (KeyBindingCommandAttribute<TKey> keyBindingCommandAttribute in keyBindingCommandAttributes)
         {
-            WriteToConsole($"Bound to keys: {string.Join(", ", keyBindingCommandAttribute.Keys)}"); // TODO: remove (debug)
+            Log.Information($"Bound to keys: {string.Join(", ", keyBindingCommandAttribute.Keys)}"); // TODO: remove (debug)
             
             command.KeyCombinations.Add(keyBindingCommandAttribute.Keys);
         }

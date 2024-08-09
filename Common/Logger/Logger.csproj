@@ -4,10 +4,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <WarningLevel>4</WarningLevel>
     </PropertyGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Logger\Logger.csproj" />
-    </ItemGroup>
 
 </Project>
