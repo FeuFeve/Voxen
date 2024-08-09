@@ -8,6 +8,7 @@ public class GeneralInputBindingRegistry : InputBindingRegistry<Keys>
 {
     #region Commands
 
+    [KeyBindingCommand<Keys>(Keys.LeftControl, Keys.B)]
     [KeyBindingCommand<Keys>(Keys.LeftControl, Keys.S)]
     public static event Action? SaveCommand;
 

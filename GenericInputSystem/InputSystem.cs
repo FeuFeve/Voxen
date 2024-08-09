@@ -77,20 +77,6 @@ public static class InputSystem<TKey> where TKey : Enum
     {
         WriteToConsole(eventInfo); // TODO: remove (debug)
 
-        KeyBindingCommandAttribute<TKey>[] keyBindingCommandAttributes = eventInfo
-            .GetCustomAttributes<KeyBindingCommandAttribute<TKey>>()
-            .ToArray();
-
-        if (keyBindingCommandAttributes.Length != 1)
-        {
-            WriteToConsole($"Event '{eventInfo}' has {keyBindingCommandAttributes.Length} associated {nameof(KeyBindingCommandAttribute<TKey>)} (expected 1)");
-            Debug.Assert(false);
-            return;
-        }
-
-        KeyBindingCommandAttribute<TKey> keyBindingCommandAttribute = keyBindingCommandAttributes[0];
-        WriteToConsole($"Bound to keys: {string.Join(", ", keyBindingCommandAttribute.Keys)}"); // TODO: remove (debug)
-
         // Find the backing field for this event
         Type registryType = commandRegistry.InputBindingRegistry.GetType();
         FieldInfo? eventBackingFieldInfo = registryType.GetField(eventInfo.Name, BindingFlags.Static | BindingFlags.NonPublic);
@@ -102,33 +88,34 @@ public static class InputSystem<TKey> where TKey : Enum
             return;
         }
 
-        commandRegistry.Commands.Add(
-            new Command<TKey>
-            {
-                Name = eventInfo.Name,
-                Keys = keyBindingCommandAttribute.Keys,
-                EventBackingFieldInfo = eventBackingFieldInfo,
-            }
-        );
-
-        // TODO: remove (debug)
-        var eventDelegate = (Delegate?)eventBackingFieldInfo.GetValue(null);
-
-        if (eventDelegate is null)
+        // Create the command, save the backing field info. The key combinations will be filled just after
+        Command<TKey> command = new()
         {
+            Name = eventInfo.Name,
+            EventBackingFieldInfo = eventBackingFieldInfo,
+        };
+
+        // Find all the KeyBindingCommandAttribute attached to this event
+        KeyBindingCommandAttribute<TKey>[] keyBindingCommandAttributes = eventInfo
+            .GetCustomAttributes<KeyBindingCommandAttribute<TKey>>()
+            .ToArray();
+
+        if (keyBindingCommandAttributes.Length == 0)
+        {
+            WriteToConsole($"Event '{eventInfo}' has 0 associated {nameof(KeyBindingCommandAttribute<TKey>)} (expected at least 1)");
+            Debug.Assert(false);
             return;
         }
 
-        foreach (Delegate handler in eventDelegate.GetInvocationList())
+        // For each KeyBindingCommandAttribute, add its keys to the command's key combinations
+        foreach (KeyBindingCommandAttribute<TKey> keyBindingCommandAttribute in keyBindingCommandAttributes)
         {
-            WriteToConsole($"Delegate: {handler.Method.Name}");
+            WriteToConsole($"Bound to keys: {string.Join(", ", keyBindingCommandAttribute.Keys)}"); // TODO: remove (debug)
+            
+            command.KeyCombinations.Add(keyBindingCommandAttribute.Keys);
         }
-
-        // TODO: store the registry type, the keys bound to the attribute, and the event delegate, so we can ...
-        // check and invoke the various delegate bound to the event
-        // Note: verify that storing the delegate is ok: if we store it and someone attaches itself to the event
-        // afterwards, does the delegate "invocation list" reflects these changes?
-        // If not: we might need to store the event backing field info (not even sure about that)
+        
+        commandRegistry.Commands.Add(command);
     }
 
     private static void CheckForCommands()
@@ -150,7 +137,8 @@ public static class InputSystem<TKey> where TKey : Enum
 
             foreach (Command<TKey> command in commandRegistry.Commands)
             {
-                if (!command.Keys.SequenceEqual(keysPressed))
+                // If the currently pressed keys don't match any of the key combinations, the event should not be triggered
+                if (!command.KeyCombinations.Any(keys => keys.SequenceEqual(keysPressed)))
                 {
                     continue;
                 }

@@ -1,6 +1,6 @@
 namespace GenericInputSystem.Attributes;
 
-[AttributeUsage(AttributeTargets.Event)]
+[AttributeUsage(AttributeTargets.Event, AllowMultiple = true)]
 public class KeyBindingCommandAttribute<TKey>
     : Attribute
     where TKey : Enum
