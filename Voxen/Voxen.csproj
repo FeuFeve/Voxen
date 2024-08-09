@@ -5,7 +5,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-<!--        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>-->
+        <WarningLevel>4</WarningLevel>
     </PropertyGroup>
 
     <ItemGroup>
@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\InputSystem\InputSystem.csproj" />
+      <ProjectReference Include="..\Common\InputSystem\InputSystem.csproj" />
     </ItemGroup>
 
 </Project>
